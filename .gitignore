@@ -3,3 +3,5 @@
 build/
 .idea/
 *.iml
+# This file includes api and secret for last.fm API account
+src/main/resources/lastfm.json

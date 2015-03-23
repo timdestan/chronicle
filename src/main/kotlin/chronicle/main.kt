@@ -11,4 +11,6 @@ fun main(args: Array<String>) {
             weezer,
             UUID.fromString("58d5ee31-a92c-347c-89d6-3acc765cab9b"))
   println(elScorcho)
+
+  LastFmImporter("foo", "bar").import()
 }
