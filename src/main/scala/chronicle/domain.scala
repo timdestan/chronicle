@@ -1,7 +1,6 @@
 package chronicle
 
 import java.util.UUID
-
 import org.joda.time.Instant
 
 // Domain classes

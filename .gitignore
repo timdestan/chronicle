@@ -1,7 +1,8 @@
 *~
 .DS_Store
 
-# SBT things
+# Build
+build/
 project/target/
 target/
 
