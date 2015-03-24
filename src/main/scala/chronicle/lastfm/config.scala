@@ -1,24 +1,24 @@
-package chronicle
+package chronicle.lastfm
 
+import chronicle.StreamEnrichments._
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import StreamEnrichments._
 
-case class LastFmConfig(apiKey: String)
+case class Config(apiKey: String)
 
-object LastFmConfig {
+object Config {
   final val configFileName: String = "/lastfm.json"
   
-  def loadFromJson(json: String): Option[LastFmConfig] =
+  def loadFromJson(json: String): Option[Config] =
     (for {
       JObject(obj) <- parse(json)
       JField("apiKey", JString(apiKey)) <- obj
-    } yield LastFmConfig(apiKey)).headOption
+    } yield Config(apiKey)).headOption
 
   def load(): Unit =
     println(Option(getClass.getResourceAsStream(configFileName))
         .flatMap(stream => loadFromJson(stream.readText))
-        .map(config => "Your API key is: ${config.apiKey}")
+        .map(config => s"Your API key is: ${config.apiKey}")
         .getOrElse(s"Couldn't load configuration file: $configFileName. " +
           "You may need to put one in src/main/resources."))
 }
