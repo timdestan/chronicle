@@ -1,6 +1,11 @@
 package chronicle
 
-import java.util.UUID;
+import chronicle.lastfm.{Config, User}
+import chronicle.enrichments.Implicits._
+import java.util.UUID
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 object Main {
   def main(args: Array[String]):Unit = {
@@ -14,6 +19,18 @@ object Main {
               Some(UUID.fromString("58d5ee31-a92c-347c-89d6-3acc765cab9b")))
     println(elScorcho)
 
-    lastfm.Config.load
+    val configOption:Option[Config] = for {
+      configFile <- Option(getClass.getResourceAsStream(Config.configFileName))
+      config <- Config.loadFromJson(configFile.readText)
+    } yield config
+
+    if (configOption.isEmpty) {
+      println("No config")
+    } else {
+      val config = configOption.get
+      val futureUser = User.lookupByName("tj6186", config)
+      val user = Await.result(futureUser, 5.seconds)
+      println(user)
+    }
   }
 }
