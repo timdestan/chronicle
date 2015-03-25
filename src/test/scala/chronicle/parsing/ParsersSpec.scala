@@ -1,7 +1,7 @@
 import chronicle.parsing.Parsers
 import org.scalatest.{WordSpec, Matchers}
 
-class ParserSpec extends WordSpec with Matchers {
+class ParsersSpec extends WordSpec with Matchers {
   "Parsers.Int" when {
     "Given a string containing an Int" should {
       "parse it to an Int" in {
