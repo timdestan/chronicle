@@ -2,7 +2,6 @@ package chronicle.lastfm
 
 import chronicle.enrichments.Implicits._
 import chronicle.parsing.Parsers.Int
-import chronicle.Request
 import dispatch._, Defaults._
 import org.json4s._
 import org.json4s.native.JsonMethods._
@@ -17,12 +16,7 @@ class NoValue extends Exception
 
 object User {
   def buildRequestFor(username: String, config: Config):String =
-    Request.forBaseUrl("http://ws.audioscrobbler.com/2.0/")
-           .withParameter("method", "user.getinfo")
-           .withParameter("user", username)
-           .withParameter("api_key", config.apiKey)
-           .withParameter("format", "json")
-           .toString
+    new Service(config).userRequestFor(username)
   
   def parseJson(json: String): Option[User] =
     Try(for {
