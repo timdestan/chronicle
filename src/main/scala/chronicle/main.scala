@@ -9,7 +9,13 @@ import scala.concurrent.duration._
 
 object Main {
   // Expected location of the configuration file containing Last.FM API key
-  final val lastFmConfigFileName: String = "/lastfm.json"
+  val lastFmConfigFileName: String = "/lastfm.json"
+
+  lazy val config: Option[Config] =
+    for {
+      configFile <- Option(getClass.getResourceAsStream(lastFmConfigFileName))
+      config <- Config.loadFromJson(configFile.readText)
+    } yield config
 
   def main(args: Array[String]):Unit = {
     val weezer =
@@ -22,16 +28,10 @@ object Main {
               Some(UUID.fromString("58d5ee31-a92c-347c-89d6-3acc765cab9b")))
     println(elScorcho)
 
-    val configOption:Option[Config] = for {
-      configFile <- Option(getClass.getResourceAsStream(lastFmConfigFileName))
-      config <- Config.loadFromJson(configFile.readText)
-    } yield config
-
-    if (configOption.isEmpty) {
+    if (config.isEmpty) {
       println("No config")
     } else {
-      val config = configOption.get
-      val futureUser = User.lookupByName("tj6186", config)
+      val futureUser = User.lookupByName("tj6186", config.get)
       val user = Await.result(futureUser, 5.seconds)
       println(user)
     }
