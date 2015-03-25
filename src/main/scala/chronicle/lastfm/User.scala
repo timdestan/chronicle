@@ -1,6 +1,7 @@
 package chronicle.lastfm
 
 import chronicle.QueryParameter
+import chronicle.parsing.Parsers.Int
 import dispatch._, Defaults._
 import org.json4s._
 import org.json4s.native.JsonMethods._
@@ -38,8 +39,7 @@ object User {
       JObject(obj) <- parse(json)
       JField("name", JString(name)) <- obj
       JField("playcount", JString(playCountStr)) <- obj
-      // TODO: Fix this, it's super ugly
-      playCount <- chronicle.enrichments.Int.unapply(playCountStr)
+      playCount <- Int(playCountStr)
     } yield User(name, playCount))
       .toOption
       .flatMap { _.headOption }
