@@ -1,6 +1,8 @@
 package chronicle.parsing
 
 import java.lang.NumberFormatException
+import org.json4s._
+import org.json4s.native.JsonMethods._
 
 object Parsers {
   object Int {
@@ -9,5 +11,12 @@ object Parsers {
     } catch {
       case _ : NumberFormatException => None
     }
+  }
+
+  object Json {
+    implicit val jsonFormats = org.json4s.DefaultFormats
+
+    def parse[T: Manifest](json: String) : Option[T] =
+      parseOpt(json) flatMap { _.extractOpt[T] }
   }
 }

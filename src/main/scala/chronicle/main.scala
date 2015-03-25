@@ -8,6 +8,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 object Main {
+  // Expected location of the configuration file containing Last.FM API key
+  final val lastFmConfigFileName: String = "/lastfm.json"
+
   def main(args: Array[String]):Unit = {
     val weezer =
         Artist(
@@ -20,7 +23,7 @@ object Main {
     println(elScorcho)
 
     val configOption:Option[Config] = for {
-      configFile <- Option(getClass.getResourceAsStream(Config.configFileName))
+      configFile <- Option(getClass.getResourceAsStream(lastFmConfigFileName))
       config <- Config.loadFromJson(configFile.readText)
     } yield config
 
