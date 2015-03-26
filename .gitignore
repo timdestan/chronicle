@@ -1,14 +1,12 @@
 *~
 .DS_Store
 
-# Build
-build/
-project/target/
-target/
+# Nuget
+packages/*
 
-# Intellij things
-.idea/
-*.iml
+*.suo
+*/bin/*
+*/obj/*
 
 # This file includes api and secret for last.fm API account
-src/main/resources/lastfm.json
+chronicle/data/lastfm/credentials.json
