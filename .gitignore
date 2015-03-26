@@ -4,6 +4,7 @@
 # Nuget
 packages/*
 
+*.DotSettings.user
 *.suo
 */bin/*
 */obj/*
