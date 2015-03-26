@@ -60,7 +60,6 @@
     </None>
     <None Include="packages.config" />
     <None Include="app.config" />
-    <None Include="Script.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Data">
