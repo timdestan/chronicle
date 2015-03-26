@@ -12,7 +12,7 @@ type LastFmUser = JsonProvider<"data/lastfm/user.getInfo.json">
 // You need to provide this file with a valid API key for this to work
 let loadApiKey () =
     LastFmApiCredentials.Load(
-        __SOURCE_DIRECTORY__ + "\data\lastfm\credentials.json").ApiKey
+        __SOURCE_DIRECTORY__ + "/data/lastfm/credentials.json").ApiKey
 
 type User(name: string, trackCount: int) =
     member this.Name = name
