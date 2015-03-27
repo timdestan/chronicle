@@ -20,4 +20,4 @@ let ``Can get top tracks for a user`` () =
 [<Test>]
 let ``Can get recent tracks for a user`` () =
     let tracks = LastFmImporter.getRecentTracksForUser "tj6186" |> Async.RunSynchronously |> Seq.toArray
-    tracks.Length |> should be (greaterThan 10)
+    tracks.Length |> should be (greaterThanOrEqualTo 10)

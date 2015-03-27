@@ -49,7 +49,6 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
-    <Compile Include="LastFmImporter.fs" />
     <EmbeddedResource Include="data\lastfm\credentials.json" />
     <None Include="data\lastfm\credentials.sample.json" />
     <None Include="data\lastfm\user.getInfo.json">
@@ -59,6 +58,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="data\lastfm\user.getRecentTracks.json" />
+    <Compile Include="Chronicle.fs" />
+    <Compile Include="LastFmImporter.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />
   </ItemGroup>

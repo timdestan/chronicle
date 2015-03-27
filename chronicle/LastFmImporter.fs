@@ -1,9 +1,8 @@
 ﻿module LastFmImporter 
 
-open System
+open Chronicle
 open FSharp.Data
 open HttpClient
-open Microsoft.FSharp.Control
 
 // Build our types based on samples of the JSON we expect.
 type LastFmApiCredentials = JsonProvider<"data/lastfm/credentials.sample.json">
@@ -15,22 +14,6 @@ type LastFmUser = JsonProvider<"data/lastfm/user.getInfo.json">
 let loadApiKey () =
     LastFmApiCredentials.Load(
         __SOURCE_DIRECTORY__ + "/data/lastfm/credentials.json").ApiKey
-
-type User(name: string, trackCount: int) =
-    member m.Name = name
-    member m.TrackCount = trackCount
-
-type Artist(name: string,
-            mbid: Guid option) =
-    member m.Name = name
-    member m.Mbid = mbid
-
-type Track(name: string,
-           artist: Artist,
-           mbid: Guid option) =
-    member m.Name = name
-    member m.Artist = artist
-    member m.Mbid = mbid
 
 // Helper for building requests:
 type RequestBuilder(username: string, apiKey: string) =
@@ -60,7 +43,7 @@ let getUser(username: string):Async<User> = async {
 }
 
 // Gets the user's top tracks
-let getTopTracksForUser(username: String) = async {
+let getTopTracksForUser(username: string) = async {
     let apiKey = loadApiKey ()
     let request = RequestBuilder(username, apiKey).forTopTracks
     let! response = (request |> getResponseBodyAsync)
@@ -73,7 +56,7 @@ let getTopTracksForUser(username: String) = async {
 }
 
 // Gets all the user's recent tracks
-let getRecentTracksForUser(username: String) = async {
+let getRecentTracksForUser(username: string) = async {
     let apiKey = loadApiKey ()
     let request = RequestBuilder(username, apiKey).forRecentTracks
     let! response = (request |> getResponseBodyAsync)
