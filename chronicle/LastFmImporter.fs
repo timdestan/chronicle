@@ -7,7 +7,8 @@ open Microsoft.FSharp.Control
 
 // Build our types based on samples of the JSON we expect.
 type LastFmApiCredentials = JsonProvider<"data/lastfm/credentials.sample.json">
-type LastFmTracks = JsonProvider<"data/lastfm/user.getTopTracks.json">
+type LastFmTopTracks = JsonProvider<"data/lastfm/user.getTopTracks.json">
+type LastFmRecentTracks = JsonProvider<"data/lastfm/user.getRecentTracks.json">
 type LastFmUser = JsonProvider<"data/lastfm/user.getInfo.json">
 
 // You need to provide this file with a valid API key for this to work
@@ -31,50 +32,55 @@ type Track(name: string,
     member m.Artist = artist
     member m.Mbid = mbid
 
-let baseUri = "http://ws.audioscrobbler.com/2.0/"
+// Helper for building requests:
+type RequestBuilder(username: string, apiKey: string) =
+    let baseUri = "http://ws.audioscrobbler.com/2.0/"
 
+    let baseRequest =
+        createRequest Get baseUri
+        |> withQueryStringItem { name="api_key"; value=apiKey }  
+        |> withQueryStringItem { name="format"; value="json" }  
+        |> withQueryStringItem { name="user"; value=username }
 
-let buildUserInfoRequest(username: string, apiKey: string) =
-    createRequest Get baseUri
-    |> withQueryStringItem { name="api_key"; value=apiKey }  
-    |> withQueryStringItem { name="format"; value="json" }  
-    |> withQueryStringItem { name="method"; value="user.getInfo" }  
-    |> withQueryStringItem { name="user"; value=username }  
+    let forMethod (methodName: string):Request =
+        baseRequest 
+        |> withQueryStringItem { name="method"; value=methodName }  
 
-let buildGetTracksRequest(username: string, apiKey: string) =
-    createRequest Get baseUri
-    |> withQueryStringItem { name="api_key"; value=apiKey }  
-    |> withQueryStringItem { name="format"; value="json" }  
-    |> withQueryStringItem { name="method"; value="user.getTopTracks" }  
-    |> withQueryStringItem { name="user"; value=username }
-    |> withQueryStringItem { name="page"; value="1" }
-
+    member m.forUserInfo = forMethod "user.getInfo"
+    member m.forTopTracks = forMethod "user.getTopTracks"
+    member m.forRecentTracks = forMethod "user.getRecentTracks"
 
 // Gets some user information from the Last.fm API
 let getUser(username: string):Async<User> = async {
     let apiKey = loadApiKey ()
-    let request = buildUserInfoRequest(username, apiKey)
+    let request = RequestBuilder(username, apiKey).forUserInfo
     let! response = (request |> getResponseBodyAsync)
     let json = LastFmUser.Parse(response)
     return User(json.User.Name, json.User.Playcount)
 }
 
-let parseArtist(artist: LastFmTracks.Artist) = 
-    new Artist(artist.Name, artist.Mbid)
-
-// Parse the JSON to a tracks object
-let parseTracks(tracks: LastFmTracks.Root) = seq {    
-    for track in tracks.Toptracks.Track do
-        let artist = parseArtist(track.Artist)
-        yield new Track(track.Name, artist, track.Mbid)
+// Gets the user's top tracks
+let getTopTracksForUser(username: String) = async {
+    let apiKey = loadApiKey ()
+    let request = RequestBuilder(username, apiKey).forTopTracks
+    let! response = (request |> getResponseBodyAsync)
+    let tracks = LastFmTopTracks.Parse(response)
+    return seq {
+        for track in tracks.Toptracks.Track do
+            let artist = new Artist(track.Artist.Name, track.Artist.Mbid)
+            yield new Track(track.Name, artist, track.Mbid)
+    }
 }
 
-// Gets all the user's tracks
-let getTracksForUser(username: String) = async {
+// Gets all the user's recent tracks
+let getRecentTracksForUser(username: String) = async {
     let apiKey = loadApiKey ()
-    let! user = getUser(username)
-    let request = buildGetTracksRequest(username, apiKey)
+    let request = RequestBuilder(username, apiKey).forRecentTracks
     let! response = (request |> getResponseBodyAsync)
-    let json = LastFmTracks.Parse(response)
-    return parseTracks(json)
+    let tracks = LastFmRecentTracks.Parse(response)
+    return seq {
+        for track in tracks.Recenttracks.Track do
+            let artist = new Artist(track.Artist.Text, track.Artist.Mbid)
+            yield new Track(track.Name, artist, track.Mbid)
+    }
 }

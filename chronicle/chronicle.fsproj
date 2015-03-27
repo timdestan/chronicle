@@ -58,6 +58,7 @@
     <None Include="data\lastfm\user.getTopTracks.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="data\lastfm\user.getRecentTracks.json" />
     <None Include="packages.config" />
     <None Include="app.config" />
   </ItemGroup>
