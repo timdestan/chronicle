@@ -3,16 +3,19 @@
 open Chronicle
 open FSharp.Data
 open HttpClient
+open System.IO
 
-// Build our types based on samples of the JSON we expect.
-type LastFmApiCredentials = JsonProvider<"data/lastfm/credentials.sample.json">
-type LastFmTopTracks = JsonProvider<"data/lastfm/user.getTopTracks.json">
-type LastFmRecentTracks = JsonProvider<"data/lastfm/user.getRecentTracks.json">
-type LastFmUser = JsonProvider<"data/lastfm/user.getInfo.json">
+module Api =
+    // A file containing the API key and secret
+    type Credentials = JsonProvider<"data/lastfm/credentials.sample.json">
+    // Types for the responses from the various API calls.
+    type TopTracks = JsonProvider<"data/lastfm/user.getTopTracks.json">
+    type RecentTracks = JsonProvider<"data/lastfm/user.getRecentTracks.json">
+    type User = JsonProvider<"data/lastfm/user.getInfo.json">
 
 // You need to provide this file with a valid API key for this to work
 let apiKey =
-    LastFmApiCredentials.Load(
+    Api.Credentials.Load(
         __SOURCE_DIRECTORY__ + "/data/lastfm/credentials.json").ApiKey
 
 // Helper for building requests:
@@ -37,7 +40,7 @@ type RequestBuilder(username: string) =
 let getUser(username: string):Async<User> = async {
     let request = RequestBuilder(username).forUserInfo
     let! response = (request |> getResponseBodyAsync)
-    let json = LastFmUser.Parse(response)
+    let json = Api.User.Parse(response)
     return {
         User.name = json.User.Name;
         trackCount = json.User.Playcount
@@ -48,7 +51,7 @@ let getUser(username: string):Async<User> = async {
 let getTopTracksForUser(username: string) = async {
     let request = RequestBuilder(username).forTopTracks
     let! response = (request |> getResponseBodyAsync)
-    let tracks = LastFmTopTracks.Parse(response)
+    let tracks = Api.TopTracks.Parse(response)
     return seq {
         for track in tracks.Toptracks.Track do
             let artist = {
@@ -85,31 +88,34 @@ let buildPaginatedRequestsFor(username: string) = async {
 }
 
 let parseRecentTracksResponse (response: string) =
-    let tracks = LastFmRecentTracks.Parse(response)
+    let tracks = Api.RecentTracks.Parse(response)
     seq {
-        for track in tracks.Recenttracks.Track do
+        for jsonTrack in tracks.Recenttracks.Track do
             let artist = { 
-                Artist.name = track.Artist.Text; 
-                mbid = track.Artist.Mbid 
+                Artist.name = jsonTrack.Artist.Text; 
+                mbid = jsonTrack.Artist.Mbid 
+            }
+            let track = {
+                Track.name = jsonTrack.Name;
+                artist = artist;
+                mbid = jsonTrack.Mbid
             }
             yield {
-                Track.name = track.Name;
-                artist = artist;
-                mbid = track.Mbid
+                time = Time.fromUnixTime(jsonTrack.Date.Uts |> int64);
+                value = track
             }
     }
 
-let getResponses requests= seq {
+// Get all responses synchronously, one after the other.
+let getResponses requests = seq {
     for request in requests do
         yield request |> getResponseBody
-        // Dumb way to slow this down so Last.FM stops rate-limiting me.
-        System.Threading.Thread.Sleep(250)
 }
 
-// Gets all the user's tracks!
-let getAllTracksForUser(username: string) = async {
+let getAllListensForUser(username: string) = async {
     let! requests = buildPaginatedRequestsFor username
     return getResponses requests
     |> Seq.map parseRecentTracksResponse
     |> Seq.concat
 }
+

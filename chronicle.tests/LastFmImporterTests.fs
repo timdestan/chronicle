@@ -24,6 +24,6 @@ let ``Can get top tracks for a user`` () =
 
 [<Test>]
 [<Timeout(600000)>]
-let ``Can get all tracks for a user eventually`` () =
-    let tracks = LastFmImporter.getAllTracksForUser testUserName |> Async.RunSynchronously |> Seq.toArray
+let ``Can get all listens for a user eventually`` () =
+    let tracks = LastFmImporter.getAllListensForUser testUserName |> Async.RunSynchronously |> Seq.toArray
     tracks.Length |> should be (greaterThanOrEqualTo tracksPlayedLowerBound)
