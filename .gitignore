@@ -2,6 +2,7 @@
 .DS_Store
 
 # Nuget
+.nuget/NuGet.exe
 packages/*
 
 *.DotSettings.user
