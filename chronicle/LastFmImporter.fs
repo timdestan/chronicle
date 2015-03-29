@@ -38,7 +38,10 @@ let getUser(username: string):Async<User> = async {
     let request = RequestBuilder(username).forUserInfo
     let! response = (request |> getResponseBodyAsync)
     let json = LastFmUser.Parse(response)
-    return User(json.User.Name, json.User.Playcount)
+    return {
+        User.name = json.User.Name;
+        trackCount = json.User.Playcount
+    }
 }
 
 // Gets the user's top tracks
@@ -48,8 +51,15 @@ let getTopTracksForUser(username: string) = async {
     let tracks = LastFmTopTracks.Parse(response)
     return seq {
         for track in tracks.Toptracks.Track do
-            let artist = new Artist(track.Artist.Name, track.Artist.Mbid)
-            yield new Track(track.Name, artist, track.Mbid)
+            let artist = {
+                Artist.name = track.Artist.Name;
+                mbid = track.Artist.Mbid
+            }
+            yield {
+                Track.name = track.Name;
+                artist = artist;
+                mbid = track.Mbid
+            }
     }
 }
 
@@ -62,7 +72,7 @@ let pagesNeededFor (total:int) =
    
 let buildPaginatedRequestsFor(username: string) = async {
     let! user = getUser(username)
-    let pagesNeeded = pagesNeededFor (user.TrackCount)
+    let pagesNeeded = pagesNeededFor user.trackCount
     let request = RequestBuilder(username).forRecentTracks
     return seq {
         for i in 1 .. pagesNeeded do
@@ -78,8 +88,15 @@ let parseRecentTracksResponse (response: string) =
     let tracks = LastFmRecentTracks.Parse(response)
     seq {
         for track in tracks.Recenttracks.Track do
-            let artist = new Artist(track.Artist.Text, track.Artist.Mbid)
-            yield new Track(track.Name, artist, track.Mbid)
+            let artist = { 
+                Artist.name = track.Artist.Text; 
+                mbid = track.Artist.Mbid 
+            }
+            yield {
+                Track.name = track.Name;
+                artist = artist;
+                mbid = track.Mbid
+            }
     }
 
 let getResponses requests= seq {
