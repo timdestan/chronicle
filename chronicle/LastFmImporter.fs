@@ -4,6 +4,7 @@ open Chronicle
 open FSharp.Data
 open HttpClient
 open System.IO
+open Time
 
 module Api =
     // A file containing the API key and secret

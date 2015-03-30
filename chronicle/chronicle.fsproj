@@ -60,6 +60,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="data\lastfm\user.getRecentTracks.json" />
+    <Compile Include="Time.fs" />
     <Compile Include="Chronicle.fs" />
     <Compile Include="LastFmImporter.fs" />
     <None Include="packages.config" />
