@@ -7,5 +7,6 @@
                  [expectations "2.0.9"]]
   :main ^:skip-aot chronicle.core
   :target-path "target/%s"
+  :resource-paths ["resources"]
   :profiles {:uberjar {:aot :all}}
   :plugins [[lein-autoexpect "1.4.2"]])

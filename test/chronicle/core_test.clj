@@ -2,4 +2,8 @@
   (:use expectations)
   (:require [chronicle.core :refer :all]))
 
-;; Hey, maybe we should add some tests, eh?
+(expect "imakey"
+        (load-api-key "resources/lastfm/credentials.sample.json"))
+
+(expect {:name "RJ" :playcount 105928}
+        (parse-user-info (slurp "resources/lastfm/user.getInfo.json")))
