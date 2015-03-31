@@ -1,14 +1,11 @@
-*~
-.DS_Store
-
-# Nuget
-.nuget/NuGet.exe
-packages/*
-
-*.DotSettings.user
-*.suo
-*/bin/*
-*/obj/*
+/target
+/classes
+/checkouts
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+/.lein-*
 
 # This file includes api and secret for last.fm API account
 chronicle/data/lastfm/credentials.json
