@@ -1,5 +1,4 @@
 (ns chronicle.core
-  (:require [clojure.data.json :as json])
   (:gen-class))
 
 (defn -main

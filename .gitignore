@@ -8,4 +8,4 @@ pom.xml.asc
 /.lein-*
 
 # This file includes api and secret for last.fm API account
-chronicle/data/lastfm/credentials.json
+resources/lastfm/credentials.json
