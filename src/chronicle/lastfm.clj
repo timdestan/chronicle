@@ -2,33 +2,62 @@
   (:require [clj-http.client :as client])
   (:gen-class))
 
-(defn request
-  [params]
-  (let
-    [api-key (:api-key params)
-     user-name (:user-name params)
-     method (:method params)
-     response
-       (client/get
-         "http://ws.audioscrobbler.com/2.0/"
-        {:query-params
-         {:api_key api-key
-          :format "json"
-          :user user-name
-          :method "user.getInfo"}
-         :as :json})]
-    (:body response)))
+(defn execute-query
+  "Executes a single query against the Last.FM API"
+  [query-params]
+  (:body
+   (client/get
+    "http://ws.audioscrobbler.com/2.0/"
+    {:query-params query-params
+     :as :json})))
 
-(def method-names
+(defn basic-query-params
+  [user-name api-key, method]
   {
-    :user-info "User.getInfo"
-  })
+    :api_key api-key
+    :format "json"
+    :user user-name
+    :method method
+   })
 
-(defn retrieve
-  "Sends a request to the Last.FM JSON API and
-   returns the response body."
-  [method-key user-name api-key]
-  (request
-   {:api-key api-key
-    :method (method-key method-names)
-    :user-name user-name }))
+(defn get-user-info
+  [user-name api-key]
+  (execute-query (basic-query-params user-name api-key "user.getInfo")))
+
+;; Their limit, not mine
+(def max-tracks-per-page 200)
+
+(defn pages-needed-for
+  "Number of requests it will take to get all a user's tracks"
+  [track-count]
+  (let [divides-evenly (= (mod track-count max-tracks-per-page) 0)
+        quotient (quot track-count max-tracks-per-page)]
+    (if divides-evenly quotient (+ quotient 1))))
+
+(defn one-to-n
+  [n]
+  "Numbers from 1 to N"
+  (map inc (take n (range))))
+
+(defn get-page-numbers
+  "Gets page numbers needed to retrieve all the user's tracks"
+  [user-name api-key]
+  (->> (get-user-info user-name api-key)
+       :user
+       :playcount
+       Integer/parseInt
+       pages-needed-for
+       one-to-n))
+
+(defn get-one-page-of-tracks
+  [user-name api-key page-number]
+  (let [page-params {:page page-number :limit max-tracks-per-page}
+        all-params (merge (basic-query-params user-name api-key "user.getRecentTracks") page-params)]
+    (execute-query all-params)))
+
+(defn import-all-tracks
+  [user-name api-key]
+  (let [page-numbers (get-page-numbers user-name api-key)
+        results (map #(get-one-page-of-tracks user-name api-key %) page-numbers)]
+    (mapcat :track (map :recenttracks results))))
+

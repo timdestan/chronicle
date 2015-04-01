@@ -27,11 +27,20 @@
         play-count (Integer/parseInt (:playcount result))]
     {:name name :playcount play-count}))
 
+(defn prune-track
+  [track]
+  (select-keys track [:name :mbid :artist :album :date]))
+
+(defn write-tracks
+  [filename tracks]
+  (spit filename
+        (pr-str (apply list tracks))))
+
 (defn -main []
   (->> "lastfm/credentials.json"
        resource
        slurp
        parse-api-key
-       (lastfm/retrieve :user-info "tj6186")
-       parse-user-info
-       println))
+       (lastfm/import-all-tracks "tj6186")
+       (map prune-track)
+       (write-tracks "resources/data/tj6186.edn")))

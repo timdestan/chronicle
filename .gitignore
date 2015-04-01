@@ -5,7 +5,8 @@ pom.xml
 pom.xml.asc
 *.jar
 *.class
-/.lein-*
+.lein-*
+.nrepl-port
 
 # This file includes api and secret for last.fm API account
 resources/lastfm/credentials.json
