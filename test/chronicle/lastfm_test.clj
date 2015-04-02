@@ -1,4 +1,4 @@
-(ns chronicle.core-test
+(ns chronicle.lastfm-test
   (:require [expectations :refer :all]
             [chronicle.json :as json]
             [chronicle.lastfm :as lastfm]))
