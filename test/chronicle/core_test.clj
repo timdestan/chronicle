@@ -1,16 +1,13 @@
 (ns chronicle.core-test
-  (:use expectations)
-  (:require [chronicle.core :refer :all]
-            [clojure.data.json :as json]
-            [clojure.java.io :refer [resource]]))
+  (:require [expectations :refer :all]
+            [chronicle.json :as json]
+            [chronicle.lastfm :as lastfm]))
 
 (expect "imakey"
-  (-> "resources/lastfm/credentials.sample.json"
-      slurp
-      parse-api-key))
+  (-> "lastfm/credentials.sample.json"
+      lastfm/load-api-key))
 
 (expect {:name "RJ" :playcount 105928}
-  (-> "resources/lastfm/user.getInfo.json"
-      slurp
-      read-json
-      parse-user-info))
+  (-> "lastfm/user.getInfo.json"
+      json/read-json-resource
+      lastfm/parse-user-info))

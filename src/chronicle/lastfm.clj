@@ -1,6 +1,13 @@
 (ns chronicle.lastfm
-  (:require [clj-http.client :as client])
+  (:require [clj-http.client :as client]
+            [chronicle.json :as json])
   (:gen-class))
+
+(defn load-api-key
+  [path]
+  (-> path
+      json/read-json-resource
+      :apiKey))
 
 (defn execute-query
   "Executes a single query against the Last.FM API"
@@ -39,13 +46,20 @@
   "Numbers from 1 to N"
   (map inc (take n (range))))
 
+(defn parse-user-info
+  "Parse user info from Last.fm"
+  [json]
+  (let [result (:user json)
+        name (:name result)
+        play-count (Integer/parseInt (:playcount result))]
+    {:name name :playcount play-count}))
+
 (defn get-page-numbers
   "Gets page numbers needed to retrieve all the user's tracks"
   [user-name api-key]
   (->> (get-user-info user-name api-key)
-       :user
+       parse-user-info
        :playcount
-       Integer/parseInt
        pages-needed-for
        one-to-n))
 
@@ -55,9 +69,13 @@
         all-params (merge (basic-query-params user-name api-key "user.getRecentTracks") page-params)]
     (execute-query all-params)))
 
+(defn prune-track
+  [track]
+  (select-keys track [:name :mbid :artist :album :date]))
+
 (defn import-all-tracks
   [user-name api-key]
   (let [page-numbers (get-page-numbers user-name api-key)
         results (map #(get-one-page-of-tracks user-name api-key %) page-numbers)]
-    (mapcat :track (map :recenttracks results))))
+    (map prune-track (mapcat :track (map :recenttracks results)))))
 
