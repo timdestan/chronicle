@@ -11,19 +11,26 @@
       slurp
       edn/read-string))
 
-(defn get-track-name-identifier
-  "Get something we can use to 'uniquely' identify a track."
-  [track]
-  ; Use the MusicBrainz id if it's there, otherwise fall back to the name
-  (if (:mbid track)
-      (:mbid track)
-      (:name track)))
+
+(defn most-played-tracks
+  [tracks]
+  (->> tracks
+       (map #(select-keys % [:artist :name :mbid]))
+       frequencies
+       (sort-by val >)))
 
 (defn -main [] 
   (->> "data/tj6186.edn"
        load-tracks
-       (take 10)
-       (map get-track-name-identifier)
+       most-played-tracks
+       (take 15)
+       (map
+        #(str
+          (:#text (:artist (key %)))
+          " - "
+          (:name (key %))
+          ", Play Count: "
+          (val %)))
        (map println)
        doall))
 
