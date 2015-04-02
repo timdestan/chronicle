@@ -73,9 +73,17 @@
   [track]
   (select-keys track [:name :mbid :artist :album :date]))
 
+(defn write-tracks
+  [filename tracks]
+  (spit filename
+        (pr-str (apply list tracks))))
+
 (defn import-all-tracks
-  [user-name api-key]
+  "Imports all the tracks for the given user and writes them as edn to the
+   provided output file name."
+  [user-name api-key out-file-name]
   (let [page-numbers (get-page-numbers user-name api-key)
         results (map #(get-one-page-of-tracks user-name api-key %) page-numbers)]
-    (map prune-track (mapcat :track (map :recenttracks results)))))
-
+    (write-tracks
+      out-file-name
+      (map prune-track (mapcat :track (map :recenttracks results))))))
