@@ -11,3 +11,6 @@
   (-> "lastfm/user.getInfo.json"
       json/read-json-resource
       lastfm/parse-user-info))
+
+(expect [{:a 1} {:b 2}]
+        (json/from-string (json/to-string [{:a 1} {:b 2}])))

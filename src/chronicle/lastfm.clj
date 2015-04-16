@@ -76,7 +76,7 @@
 (defn write-tracks
   [filename tracks]
   (spit filename
-        (pr-str (apply list tracks))))
+        (json/to-string (apply list tracks))))
 
 (defn import-all-tracks
   "Imports all the tracks for the given user and writes them as edn to the

@@ -3,7 +3,12 @@
             [clojure.java.io :refer [resource]])
   (:gen-class))
 
-(defn read-json
+(defn to-string
+  "Converts a json object to a string."
+  [json-obj]
+  (json/write-str json-obj))
+
+(defn from-string
   "Reads a json object using keywords for keys"
   [json-str]
   (json/read-str json-str :key-fn keyword))
@@ -14,4 +19,4 @@
   (-> resource-path
       resource
       slurp
-      read-json))
+      from-string))
