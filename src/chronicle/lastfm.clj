@@ -79,7 +79,7 @@
         (json/to-string (apply list tracks))))
 
 (defn import-all-tracks
-  "Imports all the tracks for the given user and writes them as edn to the
+  "Imports all the tracks for the given user and writes them as json to the
    provided output file name."
   [user-name api-key out-file-name]
   (let [page-numbers (get-page-numbers user-name api-key)
