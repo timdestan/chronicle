@@ -81,9 +81,11 @@
   (let [api-key (lastfm/load-api-key "lastfm/credentials.json")]
        (lastfm/import-all-tracks user-name api-key (str "resources/" user-data-path))))
 
-(defn -main []
+(defn print-some-stuff []
   (dorun
    [(println "Top Artists:")
     (doall (map println (take 50 (format-top-artists))))
     (println "\nTop Tracks:")
     (doall (map println (take 50 (format-top-tracks))))]))
+
+(defn -main [] (print-some-stuff))

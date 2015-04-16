@@ -80,10 +80,10 @@
 
 (defn import-all-tracks
   "Imports all the tracks for the given user and writes them as json to the
-   provided output file name."
+  provided output file name."
   [user-name api-key out-file-name]
   (let [page-numbers (get-page-numbers user-name api-key)
         results (map #(get-one-page-of-tracks user-name api-key %) page-numbers)]
     (write-tracks
-      out-file-name
-      (map prune-track (mapcat :track (map :recenttracks results))))))
+     out-file-name
+     (mapcat :track (map :recenttracks results)))))
