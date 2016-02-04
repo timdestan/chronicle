@@ -40,7 +40,7 @@
 (defn top-artists
   [tracks]
   (->> tracks
-       (map :artist tracks)
+       (map :artist)
        histogram))
 
 (defn format-artist
@@ -65,27 +65,38 @@
        histogram))
 
 (defn load-and-format-histogram
-  [build-histogram format-observation]
-  (->> user-data-path
-       load-tracks
+  [tracks build-histogram format-observation]
+  (->> tracks
        build-histogram
        (formatted-histogram format-observation)))
 
-(defn format-top-tracks []
-  (load-and-format-histogram top-tracks format-track))
+(defn format-top-tracks
+  [tracks]
+  (load-and-format-histogram tracks top-tracks format-track))
 
-(defn format-top-artists []
-  (load-and-format-histogram top-artists format-artist))
+(defn format-top-artists
+  [tracks]
+  (load-and-format-histogram tracks top-artists format-artist))
+
+(defn count-unique-artists
+  [tracks]
+  (->> tracks (map :artist) set count))
 
 (defn pull-all-data-from-lastfm []
   (let [api-key (lastfm/load-api-key "lastfm/credentials.json")]
-       (lastfm/import-all-tracks user-name api-key (str "resources/" user-data-path))))
+    (lastfm/import-all-tracks
+      user-name api-key (str "resources/" user-data-path))))
 
-(defn print-some-stuff []
-  (dorun
-   [(println "Top Artists:")
-    (doall (map println (take 50 (format-top-artists))))
-    (println "\nTop Tracks:")
-    (doall (map println (take 50 (format-top-tracks))))]))
+(defn sanity-checks []
+  "Print out some stats that Last.fm shows so we can compare to their
+   website as a test."
+  (let [tracks (load-tracks user-data-path)]
+    (dorun
+      [(println "Top Artists:")
+       (doall (map println (take 50 (format-top-artists tracks))))
+       (println "\nTop Tracks:")
+       (doall (map println (take 50 (format-top-tracks tracks))))
+       (println "\nNumber of artists:")
+       (println (count-unique-artists tracks))])))
 
-(defn -main [] (print-some-stuff))
+(defn -main [] (sanity-checks))
