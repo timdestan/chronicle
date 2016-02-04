@@ -31,13 +31,13 @@
        frequencies
        (sort-by val >)))
 
-(defn top-tracks
+(defn build-top-tracks-histogram
   [tracks]
   (->> tracks
        (map #(select-keys % [:artist :name :mbid]))
        histogram))
 
-(defn top-artists
+(defn build-top-artists-histogram
   [tracks]
   (->> tracks
        (map :artist)
@@ -57,26 +57,22 @@
 (defn formatted-histogram
   "Creates a formatted histogram.
   * histogram: A list of key-count pairs in decreasing order by count.
-  * format-observation: Function to format each observation into a string."
-  [format-observation histogram]
-  (map #(str (format-observation (key %))
+  * formatter: Function to format each observation into a string."
+  [formatter histogram]
+  (map #(str (formatter (key %))
              ", Count: "
              (val %))
        histogram))
 
-(defn load-and-format-histogram
-  [tracks build-histogram format-observation]
-  (->> tracks
-       build-histogram
-       (formatted-histogram format-observation)))
-
 (defn format-top-tracks
   [tracks]
-  (load-and-format-histogram tracks top-tracks format-track))
+  (let [top-tracks (build-top-tracks-histogram tracks)]
+    (formatted-histogram format-track top-tracks)))
 
 (defn format-top-artists
   [tracks]
-  (load-and-format-histogram tracks top-artists format-artist))
+  (let [top-artists (build-top-artists-histogram tracks)]
+    (formatted-histogram format-artist top-artists)))
 
 (defn count-unique-artists
   [tracks]
@@ -92,11 +88,16 @@
    website as a test."
   (let [tracks (load-tracks user-data-path)]
     (dorun
-      [(println "Top Artists:")
+      [(println "Number of scrobbles:")
+       (println (count tracks))
+       (println)
+       (println "Number of artists:")
+       (println (count-unique-artists tracks))
+       (println)
+       (println "Top Artists:")
        (doall (map println (take 50 (format-top-artists tracks))))
-       (println "\nTop Tracks:")
-       (doall (map println (take 50 (format-top-tracks tracks))))
-       (println "\nNumber of artists:")
-       (println (count-unique-artists tracks))])))
+       (println)
+       (println "Top Tracks:")
+       (doall (map println (take 50 (format-top-tracks tracks))))])))
 
 (defn -main [] (sanity-checks))
